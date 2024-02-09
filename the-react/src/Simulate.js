@@ -1,16 +1,21 @@
-
-
 import React, { useState, useEffect } from 'react';
-import { GoogleMap, LoadScript, Marker, useJsApiLoader, useLoadScript } from '@react-google-maps/api';
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import "leaflet/dist/leaflet.css";
 
 const containerStyle = {
   width: '100%',
   height: '400px'
 };
 
+const carIcon = new L.Icon({
+    iconUrl: 'https://github.com/sakariye22/taxi-logic-backend/blob/main/the-react/src/calendar-svgrepo-com.svg', // Specify your car icon path
+    iconSize: [35, 35], // Size of the icon
+  });
+
 
 // Static driver data (assuming you would fetch this data in a real app)
-const drivers = [
+const drivers2 = [
     {
         "name": "Driver One",
         "email": "driver1@example.com",
@@ -56,64 +61,49 @@ const drivers = [
         "lng": 17.8458
     }
 ]
+
+function ChangeView({ center }) {
+    const map = useMap();
+    map.setView(center);
+    return null;
+  }
+ 
+const Simulate = () => {
+    const [drivers, setDrivers] = useState(drivers2);
   
-  // Paste your driver objects here
-  const Simulate = () => {
-    const { isLoaded } = useJsApiLoader({
-      id: 'google-map-script',
-      googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
-      libraries: ['places'], // Specify the libraries you need.
-    });
-  
-    const [mapCenter, setMapCenter] = useState({ lat: 59.6164, lng: 17.8451 });
-    const [addresses, setAddresses] = useState([]);
+    // Function to simulate driver movement
+    const simulateDriverMovement = () => {
+      const updatedDrivers = drivers.map(driver => ({
+        ...driver,
+        lat: driver.lat + (Math.random() - 0.5) * 0.001, // Adjust these values as needed
+        lng: driver.lng + (Math.random() - 0.5) * 0.001,
+      }));
+      setDrivers(updatedDrivers);
+    };
   
     useEffect(() => {
-      if (isLoaded) {
-        const geocoder = new window.google.maps.Geocoder();
+      const movementInterval = setInterval(simulateDriverMovement, 2000); // Update every 2 seconds
   
-        drivers.forEach((driver, index) => {
-          geocoder.geocode({ location: { lat: driver.lat, lng: driver.lng } }, (results, status) => {
-            if (status === 'OK') {
-              if (results[0]) {
-                setAddresses((currentAddresses) => [
-                  ...currentAddresses,
-                  { ...driver, address: results[0].formatted_address },
-                ]);
-              } else {
-                console.log('No results found');
-              }
-            } else {
-              console.log('Geocoder failed due to: ' + status);
-            }
-          });
-        });
-      }
-    }, [isLoaded]);
+      return () => clearInterval(movementInterval); // Clear interval on component unmount
+    }, [drivers]);
   
     return (
-      <div className="map-container">
-        {isLoaded ? (
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={mapCenter}
-            zoom={14}
-          >
-            {addresses.map((driver, index) => (
-              <Marker
-                key={index}
-                position={{ lat: driver.lat, lng: driver.lng }}
-                label={driver.vehicle} // Now using driver's name, change as needed
-              />
-            ))}
-          </GoogleMap>
-        ) : (
-          <div>Loading...</div>
-        )}
-      </div>
+        <MapContainer center={[59.6164, 17.8451]} zoom={12} style={{ height: '300px', width: '80%', border: '1px solid #ccc' }}>
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
+        {drivers.map((driver, index) => (
+          <Marker
+            key={index}
+            position={[driver.lat, driver.lng]}
+            icon={carIcon} // Use your custom car icon
+          />
+        ))}
+        <ChangeView center={[59.6164, 17.8451]} />
+      </MapContainer>
     );
   };
   
   export default React.memo(Simulate);
- 
   
