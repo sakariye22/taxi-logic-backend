@@ -8,6 +8,7 @@ const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const cors = require("cors"); 
 const morgan = require("morgan");
+const driverRoutes= require('./routes/driverRoutes.js');
 
 var corsOptions = {
   origin: '*', 
@@ -27,14 +28,16 @@ app.get("/", (req, res) => {
   res.json({ user: "logic backend" });
 });
 
+app.use('/api',driverRoutes);
 
+/*
 app.post('/location', (req, res) => {
   const { latitude, longitude } = req.body;
  console.log(`Received location: Latitude ${latitude}, Longitude ${longitude}`);
 
   res.status(200).json({ message: 'Location received successfully.' });
 });
-
+*/
 
 app.listen(PORT, () => {
   console.log("Server is listening on port " + PORT);
