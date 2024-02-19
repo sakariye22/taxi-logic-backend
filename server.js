@@ -10,6 +10,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const morgan = require("morgan");
 const driverRoutes = require('./routes/driverRoutes.js');
+const userRoutes = require('./routes/userRoutes.js');
 
 var corsOptions = {
   origin: '*', 
@@ -27,6 +28,7 @@ app.get("/", (req, res) => {
 });
 
 app.use('/api', driverRoutes);
+app.use('/api', userRoutes);
 
 app.listen(PORT, () => {
   console.log("Server is listening on port " + PORT);

@@ -6,37 +6,39 @@ const Driver = require('../model/Driver.js');
 require('dotenv').config();
 
 
-router.post('/get-driver-location', async (req, res) => {
-    const { driverId } = req.body;
-  
-    if (!driverId) {
-      return res.status(400).send({ message: 'Driver ID is required.' });
-    }
-  
+
+
+router.get('/get-location/fordrivers', async (req, res) => {
     try {
-      const driver = await Driver.findById(driverId);
+      const drivers = await Driver.find({
+        lat: { $ne: null },
+        lng: { $ne: null }
+      }, 'lat lng -_id').exec();
   
-      if (!driver) {
-        return res.status(404).send({ message: 'Driver not found.' });
+      if (drivers.length === 0) {
+        return res.status(404).send({ message: 'No drivers with location found.' });
       }
   
-    
-      if (!driver.isActive) {
-        return res.status(403).send({ message: 'Driver is not currently active.' });
-      }
+     
+      const locations = drivers.map(driver => ({
+        lat: driver.lat,
+        lng: driver.lng,
+      }));
   
       res.status(200).json({
-        message: 'Driver location retrieved successfully.',
-        location: {
-          lat: driver.lat,
-          lng: driver.lng,
-        },
+        message: 'Driver locations retrieved successfully.',
+        locations: locations,
       });
     } catch (error) {
       console.error(error);
-      res.status(500).send({ message: 'Server error while retrieving driver location.', error: error.message });
+      res.status(500).send({ message: 'Server error while retrieving driver locations.', error: error.message });
     }
   });
+  
+  
+
+
+
   router.post('/logout-user', async (req, res) => {
     try { }
    catch (error) { }
