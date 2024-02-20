@@ -37,6 +37,9 @@ const driverSchema = new mongoose.Schema({
   lng: {
     type: Number,
     required: false,
+  },  onRide: {
+    type: Boolean,
+    default: false, 
   },
  
 }, { timestamps: true });

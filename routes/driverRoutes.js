@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Driver = require('../model/Driver.js'); // Ensure the path is correct
+const Driver = require('../model/Driver.js'); 
+const Ride = require('../model/Ride.js');
 require('dotenv').config();
 
 router.patch('/update-location/:driverId', async (req, res) => {
