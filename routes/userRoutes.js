@@ -31,80 +31,88 @@ async function geocodeAddress(address) {
 
 
 
-
 router.get('/get-location/fordrivers', async (req, res) => {
-    try {
-      const drivers = await Driver.find({
-        lat: { $ne: null },
-        lng: { $ne: null }
-      }, 'lat lng -_id').exec();
-  
-      if (drivers.length === 0) {
-        return res.status(404).send({ message: 'No drivers with location found.' });
-      }
-  
+  try {
+    const drivers = await Driver.find({
+      'location.coordinates': { $exists: true, $ne: [0, 0] } // Check that the location has been set
+    }, 'location -_id').exec();
+
+    if (drivers.length === 0) {
+      return res.status(404).send({ message: 'No drivers with location found.' });
+    }
+
+    const locations = drivers.map(driver => driver.location);
+
+    res.status(200).json({
+      message: 'Driver locations retrieved successfully.',
+      locations: locations,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Server error while retrieving driver locations.', error: error.message });
+  }
+});
+
+router.post('/request-ride', async (req, res) => {
+  const { userId, pickupAddress, dropoffAddress, fare } = req.body;
+  console.log('Request Body:', req.body);
+  try {
+   
+    const pickupCoordinates = await geocodeAddress(pickupAddress);
+    if (!pickupCoordinates) {
+      return res.status(400).send({ message: 'Invalid pickup address.' });
+    }
+
+    const dropoffCoordinates = await geocodeAddress(dropoffAddress);
+    if (!dropoffCoordinates) {
+      return res.status(400).send({ message: 'Invalid dropoff address.' });
+    }
+
+    const newRide = new Ride({
+      user: userId,
+      pickupLocation: {
+        type: 'Point',
+        coordinates: pickupCoordinates 
+      },
+      dropoffLocation: {
+        type: 'Point',
+        coordinates: dropoffCoordinates // [longitude, latitude]
+      },
+      fare,
+      status: 'requested',
+    });
+
+    const availableDriver = await Driver.findOne({
+      location: {
+        $nearSphere: {
+          $geometry: {
+            type: "Point",
+            coordinates: pickupCoordinates // [longitude, latitude]
+          },
+          $maxDistance: 40075000 // adjust based on your application's requirements
+        }
+      },
+      onRide: false
+    }).exec();
+
+    if (!availableDriver) {
+      return res.status(404).send({ message: 'No available drivers found.' });
+    }
+
+    newRide.driver = availableDriver._id;
+    await newRide.save();
+
+    res.status(200).json({ message: 'Ride requested successfully.', ride: newRide });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Server error while requesting a ride.', error: error.message });
+  }
+});
+
+
+
+
      
-      const locations = drivers.map(driver => ({
-        lat: driver.lat,
-        lng: driver.lng,
-      }));
-  
-      res.status(200).json({
-        message: 'Driver locations retrieved successfully.',
-        locations: locations,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send({ message: 'Server error while retrieving driver locations.', error: error.message });
-    }
-  });
-  router.post('/request-ride', async (req, res) => {
-    const { userId, pickupCoordinates, dropoffLocation, fare } = req.body;
-  
-    try {
-      const dropoffCoordinates = await geocodeAddress(dropoffLocation); 
-  
-      const newRide = new Ride({
-        user: userId,
-        pickupLocation: {
-          type: 'Point',
-          coordinates: pickupCoordinates
-        },
-        dropoffLocation: {
-          type: 'Point',
-          coordinates: dropoffCoordinates
-        },
-        fare,
-        status: 'requested',
-      });
-  
-      const availableDriver = await Driver.findOne({
-        location: {
-          $nearSphere: {
-            $geometry: {
-              type: "Point",
-              coordinates: pickupCoordinates
-            }
-          }
-        },
-        onRide: false,
-        isActive: true, 
-      }).exec();
-  
-      if (!availableDriver) {
-        return res.status(404).send({ message: 'No available drivers found.' });
-      }
-  
-      newRide.driver = availableDriver._id;
-      await newRide.save();
-  
-      res.status(200).json({ message: 'Ride requested successfully.', ride: newRide });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send({ message: 'Server error while requesting a ride.', error: error.message });
-    }
-  });
-  
 
 
   router.post('/logout-user', async (req, res) => {
