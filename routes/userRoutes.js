@@ -5,6 +5,29 @@ const Driver = require('../model/Driver.js');
 const Ride = require('../model/Ride.js');
 
 require('dotenv').config();
+const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+const axios = require('axios'); 
+
+// Geocode
+async function geocodeAddress(address) {
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
+  try {
+      const response = await axios.get(url);
+      if (response.data.status === 'OK') {
+          const { lat, lng } = response.data.results[0].geometry.location;
+          return [lng, lat];
+      } else if (response.data.status === 'ZERO_RESULTS') {
+          console.error('Geocoding error: No results found for the address.');
+          throw new Error('No results found for the address. Please verify the address details.');
+      } else {
+          throw new Error('Geocode was not successful for the following reason: ' + response.data.status);
+      }
+  } catch (error) {
+      console.error('Geocoding error:', error);
+      throw error;
+  }
+}
+
 
 
 
@@ -35,30 +58,39 @@ router.get('/get-location/fordrivers', async (req, res) => {
       res.status(500).send({ message: 'Server error while retrieving driver locations.', error: error.message });
     }
   });
-  
   router.post('/request-ride', async (req, res) => {
     const { userId, pickupCoordinates, dropoffLocation, fare } = req.body;
   
     try {
+      const dropoffCoordinates = await geocodeAddress(dropoffLocation); 
+  
       const newRide = new Ride({
         user: userId,
         pickupLocation: {
           type: 'Point',
-          coordinates: pickupCoordinates 
+          coordinates: pickupCoordinates
         },
-        dropoffLocation,
+        dropoffLocation: {
+          type: 'Point',
+          coordinates: dropoffCoordinates
+        },
         fare,
         status: 'requested',
       });
   
-    
-const availableDriver = await Driver.findOne({
-    lat: { $ne: null }, 
-    lng: { $ne: null },
-    onRide: false, 
-  }).exec();
+      const availableDriver = await Driver.findOne({
+        location: {
+          $nearSphere: {
+            $geometry: {
+              type: "Point",
+              coordinates: pickupCoordinates
+            }
+          }
+        },
+        onRide: false,
+        isActive: true, 
+      }).exec();
   
-      
       if (!availableDriver) {
         return res.status(404).send({ message: 'No available drivers found.' });
       }
@@ -73,7 +105,6 @@ const availableDriver = await Driver.findOne({
     }
   });
   
-
 
 
   router.post('/logout-user', async (req, res) => {
