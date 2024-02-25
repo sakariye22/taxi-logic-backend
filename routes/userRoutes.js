@@ -34,7 +34,7 @@ async function geocodeAddress(address) {
 router.get('/get-location/fordrivers', async (req, res) => {
   try {
     const drivers = await Driver.find({
-      'location.coordinates': { $exists: true, $ne: [0, 0] } // Check that the location has been set
+      'location.coordinates': { $exists: true, $ne: [0, 0] } 
     }, 'location -_id').exec();
 
     if (drivers.length === 0) {
@@ -56,6 +56,7 @@ router.get('/get-location/fordrivers', async (req, res) => {
 router.post('/request-ride', async (req, res) => {
   const { userId, pickupAddress, dropoffAddress, fare } = req.body;
   console.log('Request Body:', req.body);
+  console.log('Request to /api/request-ride received'); 
   try {
    
     const pickupCoordinates = await geocodeAddress(pickupAddress);
@@ -76,28 +77,32 @@ router.post('/request-ride', async (req, res) => {
       },
       dropoffLocation: {
         type: 'Point',
-        coordinates: dropoffCoordinates // [longitude, latitude]
+        coordinates: dropoffCoordinates
       },
       fare,
       status: 'requested',
     });
 
-    const availableDriver = await Driver.findOne({
+    const availableDriver = await Driver.findOne({ 
       location: {
         $nearSphere: {
           $geometry: {
             type: "Point",
-            coordinates: pickupCoordinates // [longitude, latitude]
+            coordinates: pickupCoordinates 
           },
-          $maxDistance: 40075000 // adjust based on your application's requirements
+          $maxDistance: 5000
         }
       },
       onRide: false
-    }).exec();
+    }).exec(); 
+    
+    
 
     if (!availableDriver) {
+      console.log('Search parameters:', pickupCoordinates);
       return res.status(404).send({ message: 'No available drivers found.' });
     }
+    
 
     newRide.driver = availableDriver._id;
     await newRide.save();

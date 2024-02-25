@@ -14,7 +14,8 @@ router.patch('/update-location/:driverId', async (req, res) => {
   
     try {
         const driver = await Driver.findByIdAndUpdate(driverId, {
-            location
+            location,
+            isActive: true, 
         }, { new: true });
   
         if (!driver) {
@@ -28,24 +29,26 @@ router.patch('/update-location/:driverId', async (req, res) => {
     }
 });
 
+
 router.post('/logout-driver', async (req, res) => {
     try {
       const driverId = req.body.driverId;
   
       const driver = await Driver.findByIdAndUpdate(driverId, {
-        $unset: { location: "" } 
+        isActive: false 
       }, { new: true });
   
       if (!driver) {
         return res.status(404).send({ message: 'Driver not found.' });
       }
   
-      res.status(200).json({ message: 'Logout successful, location data cleared.' });
+      res.status(200).json({ message: 'Logout successful, driver marked as inactive.' });
     } catch (error) {
       console.error('Error during logout:', error);
       res.status(500).send({ message: 'Server error while processing logout.', error: error.message });
     }
-  });
+});
+
   
 
   
