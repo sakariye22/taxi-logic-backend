@@ -14,17 +14,24 @@ const rideSchema = new mongoose.Schema({
   pickupLocation: {
     type: {
       type: String,
-      default: 'Point',
+      enum: ['Point'], 
       required: true,
     },
     coordinates: {
-      type: [Number],
+      type: [Number], 
       required: true,
     }
   },
   dropoffLocation: {
-    type: String,
-    required: true,
+    type: {
+      type: String,
+      enum: ['Point'], 
+      required: true,
+    },
+    coordinates: {
+      type: [Number], 
+      required: true,
+    }
   },
   status: {
     type: String,
@@ -36,7 +43,6 @@ const rideSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  
   createdAt: {
     type: Date,
     default: Date.now,
@@ -48,9 +54,14 @@ const rideSchema = new mongoose.Schema({
     },
     coordinates: {
       type: [Number],
-      required: false, 
+      required: false,
     }
   },
-});
+}, { timestamps: true }); 
+
+// Indexing geospatial fields
+rideSchema.index({ 'pickupLocation': '2dsphere' });
+rideSchema.index({ 'dropoffLocation': '2dsphere' });
+rideSchema.index({ 'driverLocation': '2dsphere' });
 
 module.exports = mongoose.model('Ride', rideSchema);
