@@ -50,6 +50,7 @@ router.get('/get-location/fordrivers', async (req, res) => {
     res.status(500).send({ message: 'Server error while retrieving driver locations.', error: error.message });
   }
 });
+
 router.post('/request-ride', async (req, res) => {
   const { userId, pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude, fare } = req.body;
   
@@ -100,7 +101,6 @@ router.post('/request-ride', async (req, res) => {
     res.status(500).send({ message: 'Server error while requesting a ride.', error: error.message });
   }
 });
-
 
 
 
