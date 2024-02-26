@@ -6,20 +6,18 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   phoneNumber: { type: String, required: true },
   paymentMethod: { type: String },
-  lat: { 
+  latitude: { // Change from 'lat' to 'latitude'
     type: Number,
     required: [true, 'Latitude is required'], 
     min: -90,
     max: 90,
   },
-  lng: { 
+  longitude: { // Change from 'lng' to 'longitude'
     type: Number,
     required: [true, 'Longitude is required'], 
     min: -180,
     max: 180,
   },
 }, { timestamps: true });
-
-
 
 module.exports = mongoose.model('User', userSchema);
