@@ -3,6 +3,8 @@ const router = express.Router();
 const User= require('../model/User.js');
 const Driver = require('../model/Driver.js');
 const Ride = require('../model/Ride.js');
+const geolib = require('geolib');
+
 
 require('dotenv').config();
 const apiKey = process.env.GOOGLE_MAPS_API_KEY;
@@ -15,18 +17,18 @@ async function geocodeAddress(address) {
       const response = await axios.get(url);
       if (response.data.status === 'OK') {
           const { lat, lng } = response.data.results[0].geometry.location;
+          console.log(`Coordinates for address "${address}": [${lng}, ${lat}]`);
           return [lng, lat];
-      } else if (response.data.status === 'ZERO_RESULTS') {
-          console.error('Geocoding error: No results found for the address.');
-          throw new Error('No results found for the address. Please verify the address details.');
       } else {
-          throw new Error('Geocode was not successful for the following reason: ' + response.data.status);
+          console.error('Geocoding error:', response.data.status);
+          return null; 
       }
   } catch (error) {
       console.error('Geocoding error:', error);
-      throw error;
+      return null; 
   }
-}
+};
+
 
 
 
@@ -53,6 +55,103 @@ router.get('/get-location/fordrivers', async (req, res) => {
   }
 });
 
+router.post('/request-ride', async (req, res) => {
+  const { userId, pickupAddress, dropoffAddress, fare } = req.body;
+  console.log('Request Body:', req.body);
+  console.log('Request to /api/request-ride received');
+  
+  try {
+    const pickupCoordinates = await geocodeAddress(pickupAddress);
+    const dropoffCoordinates = await geocodeAddress(dropoffAddress);
+    
+    if (pickupCoordinates === null) {
+      return res.status(400).send({ message: 'Geocoding failed for pickup address.' });
+    }
+    
+    if (dropoffCoordinates === null) {
+      return res.status(400).send({ message: 'Geocoding failed for dropoff address.' });
+    }
+
+    if (!Array.isArray(pickupCoordinates) || pickupCoordinates.length < 2) {
+      console.log(`Invalid pickup address or geocoding failed for address: ${pickupAddress}`);
+      return res.status(400).send({ 
+        message: 'Invalid pickup address or geocoding failed.', 
+        address: pickupAddress,
+        error: 'Geocoding returned an invalid result.'
+      });
+    }
+    
+    
+    if (!Array.isArray(dropoffCoordinates) || dropoffCoordinates.length < 2) {
+      console.log(`Invalid dropoff address or geocoding failed for address: ${dropoffAddress}`);
+      return res.status(400).send({ 
+        message: 'Invalid dropoff address or geocoding failed.', 
+        address: dropoffAddress,
+        error: 'Geocoding returned an invalid result.'
+      });
+    }
+
+    const drivers = await Driver.find({ onRide: false }).exec();
+
+    const pickupCoordsObj = {
+      latitude: pickupCoordinates[1],
+      longitude: pickupCoordinates[0],
+    };
+
+    let nearestDriver = null;
+    let shortestDistance = Infinity;
+
+    drivers.forEach((driver) => {
+      if (!driver.location || !Array.isArray(driver.location.coordinates) || driver.location.coordinates.length < 2) {
+        console.warn(`Skipping driver with invalid location: ${driver.id}`);
+        return; 
+      }
+    
+      const driverLocation = {
+        latitude: driver.location.coordinates[1],
+        longitude: driver.location.coordinates[0],
+      };
+    
+      const distance = geolib.getDistance(pickupCoordsObj, driverLocation);
+    
+      if (distance < shortestDistance) {
+        shortestDistance = distance;
+        nearestDriver = driver;
+      }
+    });
+    
+
+    if (!nearestDriver) {
+      return res.status(404).send({ message: 'No available drivers found.' });
+    }
+
+    const newRide = new Ride({
+      user: userId,
+      driver: nearestDriver._id,
+      pickupLocation: {
+        type: 'Point',
+        coordinates: pickupCoordinates,
+      },
+      dropoffLocation: {
+        type: 'Point',
+        coordinates: dropoffCoordinates,
+      },
+      fare,
+      status: 'requested',
+    });
+
+    await newRide.save();
+
+    res.status(200).json({ message: 'Ride requested successfully.', ride: newRide });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Server error while requesting a ride.', error: error.message });
+  }
+});
+
+
+
+/*
 router.post('/request-ride', async (req, res) => {
   const { userId, pickupAddress, dropoffAddress, fare } = req.body;
   console.log('Request Body:', req.body);
@@ -114,7 +213,7 @@ router.post('/request-ride', async (req, res) => {
   }
 });
 
-
+*/
 
 
      
