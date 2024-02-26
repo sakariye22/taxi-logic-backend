@@ -8,17 +8,23 @@ const driverSchema = new mongoose.Schema({
   licenseNumber: { type: String, required: true },
   vehicle: { type: String, required: true },
   isActive: { type: Boolean, default: false },
-  location: {
-    type: { type: String, enum: ['Point'], default: 'Point' },
-    coordinates: {
-      type: [Number],
-      index: '2dsphere',
-      validate: [validateCoordinates, '{PATH} must have exactly 2 elements (longitude, latitude)']
-    },},
+  latitude: {
+    type: Number,
+    required: true, 
+    min: -90,
+    max: 90,
+  },
+  longitude: {
+    type: Number,
+    required: true, 
+    min: -180,
+    max: 180,
+  },
   onRide: { type: Boolean, default: false },
 }, { timestamps: true });
-function validateCoordinates(val) {
+
+/*function validateCoordinates(val) {
   return val.length === 2;
 }
-
+*/
 module.exports = mongoose.model('Driver', driverSchema);

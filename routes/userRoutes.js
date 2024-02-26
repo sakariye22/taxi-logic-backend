@@ -35,19 +35,15 @@ async function geocodeAddress(address) {
 
 router.get('/get-location/fordrivers', async (req, res) => {
   try {
-    const drivers = await Driver.find({
-      'location.coordinates': { $exists: true, $ne: [0, 0] } 
-    }, 'location -_id').exec();
+    const drivers = await Driver.find({ isActive: true }, 'latitude longitude -_id').exec();
 
     if (drivers.length === 0) {
       return res.status(404).send({ message: 'No drivers with location found.' });
     }
 
-    const locations = drivers.map(driver => driver.location);
-
     res.status(200).json({
       message: 'Driver locations retrieved successfully.',
-      locations: locations,
+      locations: drivers, 
     });
   } catch (error) {
     console.error(error);
@@ -57,85 +53,43 @@ router.get('/get-location/fordrivers', async (req, res) => {
 
 router.post('/request-ride', async (req, res) => {
   const { userId, pickupAddress, dropoffAddress, fare } = req.body;
-  console.log('Request Body:', req.body);
-  console.log('Request to /api/request-ride received');
   
   try {
     const pickupCoordinates = await geocodeAddress(pickupAddress);
     const dropoffCoordinates = await geocodeAddress(dropoffAddress);
     
-    if (pickupCoordinates === null) {
-      return res.status(400).send({ message: 'Geocoding failed for pickup address.' });
-    }
-    
-    if (dropoffCoordinates === null) {
-      return res.status(400).send({ message: 'Geocoding failed for dropoff address.' });
+    if (!pickupCoordinates || !dropoffCoordinates) {
+      return res.status(400).send({ message: 'Geocoding failed for one or more addresses.' });
     }
 
-    if (!Array.isArray(pickupCoordinates) || pickupCoordinates.length < 2) {
-      console.log(`Invalid pickup address or geocoding failed for address: ${pickupAddress}`);
-      return res.status(400).send({ 
-        message: 'Invalid pickup address or geocoding failed.', 
-        address: pickupAddress,
-        error: 'Geocoding returned an invalid result.'
-      });
-    }
-    
-    
-    if (!Array.isArray(dropoffCoordinates) || dropoffCoordinates.length < 2) {
-      console.log(`Invalid dropoff address or geocoding failed for address: ${dropoffAddress}`);
-      return res.status(400).send({ 
-        message: 'Invalid dropoff address or geocoding failed.', 
-        address: dropoffAddress,
-        error: 'Geocoding returned an invalid result.'
-      });
-    }
+    const drivers = await Driver.find({ isActive: true, onRide: false });
 
-    const drivers = await Driver.find({ onRide: false }).exec();
-
-    const pickupCoordsObj = {
-      latitude: pickupCoordinates[1],
-      longitude: pickupCoordinates[0],
-    };
+    if (!drivers.length) {
+      return res.status(404).send({ message: 'No available drivers found.' });
+    }
 
     let nearestDriver = null;
     let shortestDistance = Infinity;
-
-    drivers.forEach((driver) => {
-      if (!driver.location || !Array.isArray(driver.location.coordinates) || driver.location.coordinates.length < 2) {
-        console.warn(`Skipping driver with invalid location: ${driver.id}`);
-        return; 
-      }
-    
-      const driverLocation = {
-        latitude: driver.location.coordinates[1],
-        longitude: driver.location.coordinates[0],
-      };
-    
-      const distance = geolib.getDistance(pickupCoordsObj, driverLocation);
-    
+    drivers.forEach(driver => {
+      const distance = geolib.getDistance(
+        { latitude: pickupCoordinates[1], longitude: pickupCoordinates[0] },
+        { latitude: driver.latitude, longitude: driver.longitude }
+      );
       if (distance < shortestDistance) {
         shortestDistance = distance;
         nearestDriver = driver;
       }
     });
-    
 
     if (!nearestDriver) {
-      return res.status(404).send({ message: 'No available drivers found.' });
+      return res.status(404).send({ message: 'No nearest driver found.' });
     }
 
     const newRide = new Ride({
       user: userId,
       driver: nearestDriver._id,
-      pickupLocation: {
-        type: 'Point',
-        coordinates: pickupCoordinates,
-      },
-      dropoffLocation: {
-        type: 'Point',
-        coordinates: dropoffCoordinates,
-      },
+      pickupLocation: { lat: pickupCoordinates[1], lng: pickupCoordinates[0] },
+      dropoffLocation: { lat: dropoffCoordinates[1], lng: dropoffCoordinates[0] },
       fare,
       status: 'requested',
     });
@@ -148,7 +102,6 @@ router.post('/request-ride', async (req, res) => {
     res.status(500).send({ message: 'Server error while requesting a ride.', error: error.message });
   }
 });
-
 
 
 /*

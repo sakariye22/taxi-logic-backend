@@ -6,19 +6,20 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   phoneNumber: { type: String, required: true },
   paymentMethod: { type: String },
-  lat: { type: Number },
-  lng: { type: Number },
-  location: {
-    type: { type: String, enum: ['Point'], default: 'Point' },
-    coordinates: { type: [Number], index: '2dsphere' },
+  lat: { 
+    type: Number,
+    required: [true, 'Latitude is required'], 
+    min: -90,
+    max: 90,
+  },
+  lng: { 
+    type: Number,
+    required: [true, 'Longitude is required'], 
+    min: -180,
+    max: 180,
   },
 }, { timestamps: true });
 
-userSchema.pre('save', function(next) {
-  if (this.lat !== undefined && this.lng !== undefined) {
-    this.location = { type: 'Point', coordinates: [this.lng, this.lat] };
-  }
-  next();
-});
+
 
 module.exports = mongoose.model('User', userSchema);
