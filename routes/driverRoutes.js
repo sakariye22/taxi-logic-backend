@@ -5,10 +5,8 @@ const Ride = require('../model/Ride.js');
 require('dotenv').config();
 
 router.patch('/update-location/:driverId', async (req, res) => {
-  console.log('Received update location request');
   const { driverId } = req.params;
-  const { latitude, longitude } = req.body; 
-
+  const { latitude, longitude } = req.body;
 
   if (latitude === undefined || longitude === undefined) {
     return res.status(400).send({ message: 'Latitude and longitude are required.' });
@@ -25,11 +23,8 @@ router.patch('/update-location/:driverId', async (req, res) => {
   try {
     const driver = await Driver.findByIdAndUpdate(driverId, {
       latitude, 
-      longitude, 
-      isActive: true,
+      longitude,
     }, { new: true });
-
-    console.log(`Driver ${driverId} updated location to: latitude ${latitude}, longitude ${longitude}`);
 
     if (!driver) {
       return res.status(404).send({ message: 'Driver not found.' });
@@ -41,6 +36,27 @@ router.patch('/update-location/:driverId', async (req, res) => {
     res.status(500).send({ message: 'Server error while updating location.', error: error.message });
   }
 });
+
+router.patch('/mark-active/:driverId', async (req, res) => {
+  const { driverId } = req.params;
+
+  try {
+    const driver = await Driver.findByIdAndUpdate(driverId, {
+      isActive: true,
+    }, { new: true });
+
+    if (!driver) {
+      return res.status(404).send({ message: 'Driver not found.' });
+    }
+
+    res.status(200).send({ message: 'Driver marked as active successfully.', driver });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Server error while marking driver as active.', error: error.message });
+  }
+});
+
+
 
 
 
