@@ -50,16 +50,12 @@ router.get('/get-location/fordrivers', async (req, res) => {
     res.status(500).send({ message: 'Server error while retrieving driver locations.', error: error.message });
   }
 });
-
 router.post('/request-ride', async (req, res) => {
-  const { userId, pickupAddress, dropoffAddress, fare } = req.body;
+  const { userId, pickupLatitude, pickupLongitude, dropoffLatitude, dropoffLongitude, fare } = req.body;
   
   try {
-    const pickupCoordinates = await geocodeAddress(pickupAddress);
-    const dropoffCoordinates = await geocodeAddress(dropoffAddress);
-    
-    if (!pickupCoordinates || !dropoffCoordinates) {
-      return res.status(400).send({ message: 'Geocoding failed for one or more addresses.' });
+    if (!pickupLatitude || !pickupLongitude || !dropoffLatitude || !dropoffLongitude) {
+      return res.status(400).send({ message: 'Complete pickup and dropoff location coordinates are required.' });
     }
 
     const drivers = await Driver.find({ isActive: true, onRide: false });
@@ -72,7 +68,7 @@ router.post('/request-ride', async (req, res) => {
     let shortestDistance = Infinity;
     drivers.forEach(driver => {
       const distance = geolib.getDistance(
-        { latitude: pickupCoordinates[1], longitude: pickupCoordinates[0] },
+        { latitude: pickupLatitude, longitude: pickupLongitude },
         { latitude: driver.latitude, longitude: driver.longitude }
       );
       if (distance < shortestDistance) {
@@ -88,8 +84,10 @@ router.post('/request-ride', async (req, res) => {
     const newRide = new Ride({
       user: userId,
       driver: nearestDriver._id,
-      pickupLocation: { lat: pickupCoordinates[1], lng: pickupCoordinates[0] },
-      dropoffLocation: { lat: dropoffCoordinates[1], lng: dropoffCoordinates[0] },
+      pickupLatitude,
+      pickupLongitude,
+      dropoffLatitude,
+      dropoffLongitude,
       fare,
       status: 'requested',
     });
@@ -102,6 +100,8 @@ router.post('/request-ride', async (req, res) => {
     res.status(500).send({ message: 'Server error while requesting a ride.', error: error.message });
   }
 });
+
+
 
 
 /*
