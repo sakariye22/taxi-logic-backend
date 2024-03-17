@@ -4,6 +4,7 @@ const fs = require('fs');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 
 
 
@@ -154,12 +155,60 @@ const rides = [
     res.json('ok');
   });
   
+  // Load Driver Data
+const loadDriverData = () => {
+    const filePath = path.join(__dirname,'make-konto', 'driver.json');
+    try {
+        if (fs.existsSync(filePath)) {
+            const data = fs.readFileSync(filePath);
+            return JSON.parse(data.toString());
+        }
+    } catch (err) {
+        console.error('Error loading driver data:', err);
+        return []; 
+    }
+  };
+  
+  // Save Driver Data
+  const saveDriverData = (data) => {
+    const filePath = path.join(__dirname, 'driver.json');
+    try {
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    } catch (err) {
+        console.error('Error saving driver data:', err);
+    }
+  };
+  
+  // Register Driver Endpoint
+  app.post('/register-driver', (req, res) => {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+        return res.status(400).send({ message: 'Name, email, and password are required.' });
+    }
+  
+    // Load existing drivers
+    const drivers = loadDriverData();
+    const newDriver = {
+      id: uuidv4(), 
+      name,
+      email,
+      password,
+      latitude: null,
+      longitude: null,
+    };
+  
+
+    drivers.push(newDriver);
+    saveDriverData(drivers); 
+  
+    res.status(201).send({ message: 'Driver registered successfully', driver: newDriver });
+  });
+  
+  module.exports = app;
+  
 
   
-/*app.get('/vehicles', (req, res) => {
-    res.json(vehicles);
-  });
-  */
+
   const loadVehicleData = () => {
     const filePath = path.join(__dirname, 'make-konto', 'vehicle.json');
     try {
@@ -169,7 +218,7 @@ const rides = [
         }
     } catch (err) {
         console.error('Error loading vehicle data:', err);
-        return []; // Or handle the error as needed
+        return []; 
     }
 };
 
@@ -179,7 +228,6 @@ const saveVehicleData = (data) => {
         fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     } catch (err) {
         console.error('Error saving vehicle data:', err);
-        // Handle the error as needed
     }
 };
 
