@@ -1,0 +1,24 @@
+[
+    {
+      "driver": 1,
+      "name": "blue",
+      "email": "blue@email.com",
+      "password": "123456",
+      "isActive": false,
+      "latitude": null,
+      "longitude": null,
+      "onRide": false
+    },
+    {
+      "driver": 2,
+      "name": "red",
+      "email": "red@email.com",
+      "password": "123456",
+      "isActive": false,
+      "latitude": null,
+      "longitude": null,
+      "onRide": false
+    }
+    
+  ]
+  
