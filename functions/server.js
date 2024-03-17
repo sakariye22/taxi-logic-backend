@@ -1,8 +1,16 @@
 const express = require('express');
 const app = express();
 const fs = require('fs');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const path = require('path');
+
+
+
 
 app.use(express.json());
+app.use(bodyParser.json());
+app.use(cors({ origin: true }));
 
 
 const drivers = [
@@ -28,6 +36,10 @@ const drivers = [
     }
     
   ];
+  
+
+
+
 const users = [
     {
       "id": 1,
@@ -115,7 +127,7 @@ const rides = [
       "updated_at": "2024-03-17T12:50:00Z"
     }
   ];
-  const payments = [
+ const payments = [
     {
       "id": 1,
       "ride_id": 1,
@@ -126,7 +138,7 @@ const rides = [
     },
   ];
   
-  const earnings = [
+ const earnings = [
     {
       "id": 1,
       "driver_id": 1,
@@ -136,74 +148,54 @@ const rides = [
     },
   ];
   
-  const vehicles = [
-    {
-      "id": 1,
-      "driver_id": 1,
-      "vehicle_type": "suv",
-      "make": "Toyota",
-      "model": "RAV4",
-      "license_plate": "XYZ1234",
-      "color": "Red"
-    },
-    {
-      "id": 2,
-      "driver_id": 2,
-      "vehicle_type": "saloon",
-      "make": "Honda",
-      "model": "Accord",
-      "license_plate": "ABC5678",
-      "color": "Blue"
-    },
-    {
-      "id": 3,
-      "driver_id": 3,
-      "vehicle_type": "estate",
-      "make": "Ford",
-      "model": "Focus Estate",
-      "license_plate": "DEF9012",
-      "color": "Black"
-    },
-    {
-      "id": 4,
-      "driver_id": 4,
-      "vehicle_type": "van",
-      "make": "Mercedes",
-      "model": "Sprinter",
-      "license_plate": "GHI3456",
-      "color": "White"
-    }
-  ];
+ 
   
-  app.get('/', (req, res) => {
+ app.get('/', (req, res) => {
     res.json('ok');
   });
   
-  app.get('/drivers', (req, res) => {
-    res.json(drivers);
-  });
+
   
-  app.get('/users', (req, res) => {
-    res.json(users);
-  });
-  
-  app.get('/rides', (req, res) => {
-    res.json(rides);
-  });
-  
-  app.get('/payments', (req, res) => {
-    res.json(payments);
-  });
-  
-  app.get('/earnings', (req, res) => {
-    res.json(earnings);
-  });
-  
-  app.get('/vehicles', (req, res) => {
+/*app.get('/vehicles', (req, res) => {
     res.json(vehicles);
   });
-  
+  */
+  const loadVehicleData = () => {
+    const filePath = path.join(__dirname, 'make-konto', 'vehicle.json');
+    try {
+        if (fs.existsSync(filePath)) {
+            const data = fs.readFileSync(filePath);
+            return JSON.parse(data.toString());
+        }
+    } catch (err) {
+        console.error('Error loading vehicle data:', err);
+        return []; // Or handle the error as needed
+    }
+};
 
+const saveVehicleData = (data) => {
+    const filePath = path.join(__dirname, 'make-konto', 'vehicle.json');
+    try {
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    } catch (err) {
+        console.error('Error saving vehicle data:', err);
+        // Handle the error as needed
+    }
+};
+
+app.post('/vehicles', (req, res) => {
+    const newVehicle = req.body;
+    if (!newVehicle.make || !newVehicle.model) {
+        return res.status(400).send({ message: 'Make and model are required.' });
+    }
+
+    const vehicles = loadVehicleData();
+    newVehicle.id = vehicles.length + 1; 
+    vehicles.push(newVehicle);
+    saveVehicleData(vehicles);
+
+    res.status(201).send({ message: 'Vehicle added successfully', vehicle: newVehicle });
+});
   
 
 
