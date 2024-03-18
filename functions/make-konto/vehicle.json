@@ -43,5 +43,14 @@
     "license_plate": "HJL213",
     "color": "Black",
     "id": 5
+  },
+  {
+    "driver_id": 2,
+    "vehicle_type": "my",
+    "make": "toyota",
+    "model": "t",
+    "license_plate": "1342",
+    "color": "red",
+    "id": 6
   }
 ]

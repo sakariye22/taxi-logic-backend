@@ -14,29 +14,6 @@ app.use(bodyParser.json());
 app.use(cors({ origin: true }));
 
 
-const drivers = [
-    {
-      "driver": 1,
-      "name": "blue",
-      "email": "blue@email.com",
-      "password": "123456",
-      "isActive": false,
-      "latitude": null,
-      "longitude": null,
-      "onRide": false
-    },
-    {
-      "driver": 2,
-      "name": "red",
-      "email": "red@email.com",
-      "password": "123456",
-      "isActive": false,
-      "latitude": null,
-      "longitude": null,
-      "onRide": false
-    }
-    
-  ];
   
 
 
@@ -156,56 +133,87 @@ const rides = [
   });
   
   // Load Driver Data
+// Load Driver Data
 const loadDriverData = () => {
-    const filePath = path.join(__dirname,'make-konto', 'driver.json');
+    const filePath = path.join(__dirname, 'make-konto', 'driver.json'); // Correct file path
     try {
         if (fs.existsSync(filePath)) {
             const data = fs.readFileSync(filePath);
             return JSON.parse(data.toString());
+        } else {
+            return []; // Return an empty array if the file doesn't exist
         }
     } catch (err) {
         console.error('Error loading driver data:', err);
-        return []; 
+        return [];
     }
-  };
-  
-  // Save Driver Data
-  const saveDriverData = (data) => {
-    const filePath = path.join(__dirname, 'driver.json');
+};
+
+// Save Driver Data
+const saveDriverData = (data) => {
+    const filePath = path.join(__dirname, 'make-konto', 'driver.json');
     try {
         fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+        console.log('Driver data saved successfully.');
     } catch (err) {
         console.error('Error saving driver data:', err);
     }
-  };
-  
-  // Register Driver Endpoint
-  app.post('/register-driver', (req, res) => {
+};
+
+
+app.post('/register-driver', (req, res) => {
     const { name, email, password } = req.body;
+    console.log('Received request to register driver:', { name, email, password });
+
     if (!name || !email || !password) {
+        console.error('Name, email, and password are required.');
         return res.status(400).send({ message: 'Name, email, and password are required.' });
     }
-  
-    // Load existing drivers
-    const drivers = loadDriverData();
+
+    let drivers = loadDriverData();
+    if (!drivers) {
+        drivers = [];
+    }
+    console.log('Existing drivers:', drivers);
+
     const newDriver = {
-      id: uuidv4(), 
-      name,
-      email,
-      password,
-      latitude: null,
-      longitude: null,
+        id: uuidv4(), 
+        name,
+        email,
+        password,
+        latitude: null,
+        longitude: null,
     };
-  
+    console.log('New driver:', newDriver);
 
     drivers.push(newDriver);
-    saveDriverData(drivers); 
-  
+    console.log('Drivers after adding new driver:', drivers);
+
+    saveDriverData(drivers);
+    console.log('Driver data saved successfully.');
+
+    // Send response with only the newly registered driver data
     res.status(201).send({ message: 'Driver registered successfully', driver: newDriver });
-  });
+});
+
+
+
   
-  module.exports = app;
-  
+// Function to delete all drivers
+const deleteAllDrivers = () => {
+    try {
+        // Clear the driver data array
+        const emptyDriverData = [];
+        saveDriverData(emptyDriverData);
+        console.log('All drivers deleted successfully.');
+    } catch (error) {
+        console.error('Error deleting drivers:', error);
+    }
+};
+
+// Example usage:
+deleteAllDrivers();
+
 
   
 
@@ -244,6 +252,9 @@ app.post('/vehicles', (req, res) => {
 
     res.status(201).send({ message: 'Vehicle added successfully', vehicle: newVehicle });
 });
+app.get('/hello',(req,res)=> {
+  res.json('hello world');
+})
   
 
 
