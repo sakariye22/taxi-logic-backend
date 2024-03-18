@@ -15,7 +15,7 @@ app.use(cors({ origin: true }));
 
 
   
-
+/*
 
 
 const users = [
@@ -132,16 +132,15 @@ const rides = [
     res.json('ok');
   });
   
-  // Load Driver Data
-// Load Driver Data
+
 const loadDriverData = () => {
-    const filePath = path.join(__dirname, 'make-konto', 'driver.json'); // Correct file path
+    const filePath = path.join(__dirname, 'make-konto', 'driver.json'); 
     try {
         if (fs.existsSync(filePath)) {
             const data = fs.readFileSync(filePath);
             return JSON.parse(data.toString());
         } else {
-            return []; // Return an empty array if the file doesn't exist
+            return []; 
         }
     } catch (err) {
         console.error('Error loading driver data:', err);
@@ -149,7 +148,6 @@ const loadDriverData = () => {
     }
 };
 
-// Save Driver Data
 const saveDriverData = (data) => {
     const filePath = path.join(__dirname, 'make-konto', 'driver.json');
     try {
@@ -192,17 +190,14 @@ app.post('/register-driver', (req, res) => {
     saveDriverData(drivers);
     console.log('Driver data saved successfully.');
 
-    // Send response with only the newly registered driver data
     res.status(201).send({ message: 'Driver registered successfully', driver: newDriver });
 });
 
 
 
-  
-// Function to delete all drivers
 const deleteAllDrivers = () => {
     try {
-        // Clear the driver data array
+
         const emptyDriverData = [];
         saveDriverData(emptyDriverData);
         console.log('All drivers deleted successfully.');
@@ -211,7 +206,7 @@ const deleteAllDrivers = () => {
     }
 };
 
-// Example usage:
+
 deleteAllDrivers();
 
 
@@ -252,10 +247,12 @@ app.post('/vehicles', (req, res) => {
 
     res.status(201).send({ message: 'Vehicle added successfully', vehicle: newVehicle });
 });
+
+*/
 app.get('/hello',(req,res)=> {
   res.json('hello world');
 })
-  
+
 
 
   
