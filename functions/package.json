@@ -6,7 +6,8 @@
     "shell": "firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "start2": "nodemon service.js"
   },
   "engines": {
     "node": "18"
@@ -19,6 +20,8 @@
     "express": "^4.18.3",
     "firebase-admin": "^11.8.0",
     "firebase-functions": "^4.3.1",
+    "mongoose": "^8.2.2",
+    "nodemon": "^3.1.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
