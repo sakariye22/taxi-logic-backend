@@ -9,8 +9,6 @@ const userRoutes = require('./routes/userRoutes');
 const mongoose = require('mongoose');
 
 
-
-
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cors({ origin: true }));
@@ -25,6 +23,7 @@ app.use(cors({ origin: true }));
     res.json('ok');
   });
   
+app.use('/api', userRoutes);
 
 
 
