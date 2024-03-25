@@ -24,7 +24,7 @@ app.use(cors({ origin: true }));
     res.json('ok');
   });
   
-app.use('/api', userRoutes);
+app.use('/api', driverRoutes);
 
 
 
