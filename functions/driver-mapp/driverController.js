@@ -43,17 +43,17 @@ const JWT_SECRET = process.env.JWT_SECRET;
     async function updateDriverProfile(req, res) {
         console.log("updateDriverProfile: Start"); // Log start
         const driverId = req.user.id;
-        const { name, email, phoneNumber, licenseNumber } = req.body;
+        const { name, email, phone_number, license_number } = req.body;
     
         console.log("Updating driver profile for ID:", driverId); // Log driverId
-        console.log("Received data:", { name, email, phoneNumber, licenseNumber }); // Log received data
+        console.log("Received data:", { name, email, phone_number, license_number }); // Log received data
     
         try {
             const updatedDriver = await Driver.findByIdAndUpdate(driverId, {
                 name: name,
                 email: email,
-                phone_number: phoneNumber,
-                license_number: licenseNumber
+                phone_number: phone_number,
+                license_number: license_number
             }, { new: true });
     
             console.log("Updated driver:", updatedDriver); // Log the updated driver
