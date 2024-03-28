@@ -3,6 +3,9 @@ const Driver = require('../model/Driver.js');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
+const fs = require('fs');
+const util = require('util');
+const readFile = util.promisify(fs.readFile); // Utilize promisify to read files with async/await
 
 
 
@@ -68,6 +71,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
         }
         
     }
+
     async function getDriverProfile(req, res) {
         console.log("getDriverProfile: Start");
         console.log("Token Payload:", req.user); // Logga payload från JWT för att se om det är korrekt
@@ -97,6 +101,35 @@ const JWT_SECRET = process.env.JWT_SECRET;
             res.status(500).json({ error: 'Server Error', details: error.message });
         }
     }
+
+   // driverController.js
+async function uploadAvatar(req, res) {
+    console.log('uploadAvatar called with file:', req.file);
+  
+    if (!req.file) {
+      console.error('No file uploaded with the request.');
+      return res.status(400).json({ error: 'No file uploaded.' });
+    }
+  
+    try {
+        const driver = await Driver.findById(req.user.id);
+        if (!driver) {
+          return res.status(404).json({ error: 'Driver not found.' });
+        }
+        
+        // Ange den korrekta sökvägen relativt från rooten av din server
+        driver.avatar = `/uploads/${req.file.filename}`;
+        await driver.save();
+  
+      console.log('Avatar uploaded successfully for driver:', driver.id);
+      res.json({ message: 'Avatar uploaded successfully', avatar: driver.avatar });
+    } catch (error) {
+      console.error('Error in uploadAvatar:', error);
+      res.status(500).json({ error: 'Server Error', details: error.message });
+    }
+  }
+  
+      
     
     
-module.exports = { protectedUser, workHours, earningsOverview,updateDriverProfile, getDriverProfile};
+module.exports = { protectedUser, workHours, earningsOverview,updateDriverProfile, getDriverProfile,uploadAvatar};
