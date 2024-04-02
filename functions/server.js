@@ -35,7 +35,7 @@ app.use('/api', driverRoutes);
 
 
 //natiuve routes 
-app.use ('/native', userNativeRoutes);
+app.use('/user', userNativeRoutes);
 
 
 

@@ -28,4 +28,36 @@ async function RideRequest(req, res) {
         res.status(500).send('Server Error');
     }
 }
-module.exports = { RideRequest };
+async function Awaiting(req, res) {
+    try {
+        const userId = req.user.id; 
+        // Fetch rides with more detailed information
+        const rides = await Ride.find({
+            user_id: userId,
+            fare_status: 'waiting_for_proposals'
+        }).select('-__v') // Exclude the version key from the results
+          .lean() // Convert Mongoose documents to plain JavaScript objects
+          .exec();
+
+        if (!rides || rides.length === 0) {
+            return res.status(404).json({ message: 'No rides found awaiting proposals.' });
+        }
+
+        const enhancedRides = rides.map(ride => ({
+            ...ride,
+            pickup_latitude: ride.pickup_latitude.toString(), 
+            pickup_longitude: ride.pickup_longitude.toString(),
+            dropoff_latitude: ride.dropoff_latitude.toString(),
+            dropoff_longitude: ride.dropoff_longitude.toString(),
+            createdAt: ride.createdAt.toISOString(), 
+            updatedAt: ride.updatedAt.toISOString(),
+        }));
+
+        res.json({ rides: enhancedRides });
+    } catch (error) {
+        console.error('Error fetching rides:', error);
+        res.status(500).send('Server Error');
+    }
+};
+
+module.exports = { RideRequest, Awaiting };
