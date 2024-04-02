@@ -8,7 +8,8 @@ const rideSchema = new mongoose.Schema({
   dropoff_latitude: { type: mongoose.Types.Decimal128, required: true },
   dropoff_longitude: { type: mongoose.Types.Decimal128, required: true },
   status: { type: String, enum: ['requested', 'accepted', 'enroute', 'completed'], default: 'requested' },
-  fare: { type: mongoose.Types.Decimal128, required: true }
+  user_proposed_fare: { type: mongoose.Types.Decimal128, required: false },
+  driver_proposed_fare: { type: mongoose.Types.Decimal128, required: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Ride', rideSchema);
