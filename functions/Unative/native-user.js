@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 async function RideRequest(req, res) {
-    const userId = req.user.id;
+    const userId = req.user.id; 
     const { pickup_latitude, pickup_longitude, dropoff_latitude, dropoff_longitude } = req.body;
     try {
         const user = await User.findById(userId);
@@ -21,12 +21,11 @@ async function RideRequest(req, res) {
             fare_status: 'waiting_for_proposals' 
         });
 
-        await ride.save();
+        await ride.save(); 
         res.status(201).json({ message: 'Ride requested successfully. Awaiting driver proposals.', rideId: ride._id });
     } catch (error) {
         console.error('Database Error:', error);
         res.status(500).send('Server Error');
     }
 }
-
 module.exports = { RideRequest };

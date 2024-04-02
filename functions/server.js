@@ -8,6 +8,7 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const driverRoutes = require('./routes/driverRoutes');
 const mongoose = require('mongoose');
+const userNativeRoutes = require ('./routes/user-native-routes.js');
 
 
 app.use(express.json());
@@ -31,6 +32,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
   
 app.use('/api', driverRoutes);
 
+
+
+//natiuve routes 
+app.use ('/native', userNativeRoutes);
 
 
 
