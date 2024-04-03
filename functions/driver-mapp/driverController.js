@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
 const fs = require('fs');
 const util = require('util');
-const readFile = util.promisify(fs.readFile); // Utilize promisify to read files with async/await
+const readFile = util.promisify(fs.readFile); 
 
 
 
@@ -17,7 +17,6 @@ const readFile = util.promisify(fs.readFile); // Utilize promisify to read files
     
 
     async function workHours(req, res) {
-        // Example dummy data for work hours by month
         res.json({
             "Jan": 120,
             "Feb": 100,
@@ -30,7 +29,6 @@ const readFile = util.promisify(fs.readFile); // Utilize promisify to read files
     }
     
     async function earningsOverview(req, res) {
-        // Example dummy data for earnings by month
         res.json({
             "Jan": 4000,
             "Feb": 4500,
@@ -59,9 +57,8 @@ const readFile = util.promisify(fs.readFile); // Utilize promisify to read files
                 license_number: license_number
             }, { new: true });
     
-            console.log("Updated driver:", updatedDriver); // Log the updated driver
-    
-            // Assuming password is hashed and you do not want to send it back
+            console.log("Updated driver:", updatedDriver); 
+
             updatedDriver.password = undefined;
     
             res.json(updatedDriver);

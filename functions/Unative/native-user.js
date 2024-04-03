@@ -31,12 +31,11 @@ async function RideRequest(req, res) {
 async function Awaiting(req, res) {
     try {
         const userId = req.user.id; 
-        // Fetch rides with more detailed information
         const rides = await Ride.find({
             user_id: userId,
             fare_status: 'waiting_for_proposals'
-        }).select('-__v') // Exclude the version key from the results
-          .lean() // Convert Mongoose documents to plain JavaScript objects
+        }).select('-__v') 
+          .lean() 
           .exec();
 
         if (!rides || rides.length === 0) {
