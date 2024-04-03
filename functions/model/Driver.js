@@ -11,5 +11,5 @@ const driverSchema = new mongoose.Schema({
   latitude: { type: mongoose.Types.Decimal128, default: null },
   longitude: { type: mongoose.Types.Decimal128, default: null }
 }, { timestamps: true });
-
+//såå
 module.exports = mongoose.model('Driver', driverSchema);

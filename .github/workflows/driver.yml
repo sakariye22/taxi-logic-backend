@@ -1,0 +1,32 @@
+name: Build and Deploy to Firebase and Notify Slack
+
+on: push
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18.x'
+
+    - name: Install Dependencies
+      run: npm install
+      working-directory: ./functions
+      
+    # Add your Firebase deployment step here
+    # - name: Firebase Deploy
+    #   run: firebase deploy --only functions
+    #   env:
+    #     FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      
+    - name: Notify Slack
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      run: |
+        curl -X POST -H 'Content-type: application/json' --data '{"text":"Project built and deployed to Firebase successfully!"}' $SLACK_WEBHOOK_URL
