@@ -39,10 +39,9 @@ jobs:
     - name: Run custom server check script
       run: npm run check-server
       working-directory: ./functions
-
-    - name: Deploy to Firebase
-      uses: w9jds/firebase-action@master
-      with:
-        args: deploy --only functions
-      env:
-        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      
+- name: Deploy to Firebase
+  run: |
+    npm install -g firebase-tools
+    firebase deploy --only functions --token ${{ secrets.FIREBASE_TOKEN }}
+  working-directory: ./functions
