@@ -29,4 +29,5 @@ jobs:
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       run: |
+        echo "URL starts with: ${SLACK_WEBHOOK_URL:0:8}"
         curl -X POST -H 'Content-type: application/json' --data '{"text":"Project built and deployed to Firebase successfully!"}' $SLACK_WEBHOOK_URL
