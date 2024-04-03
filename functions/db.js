@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const mongoURI = process.env.MONGODB_URL;
-
 // Async function to connect to the database
 async function connectToDatabase() {
   const startTime = Date.now();
@@ -13,7 +12,7 @@ async function connectToDatabase() {
     });
     const endTime = Date.now();
     console.log('Connected to MongoDB');
-    console.log(`Connection time: ${endTime - startTime} ms`); // Fixat syntaxfel här
+    console.log(`Connection time: ${endTime - startTime} ms`); 
   } catch (err) {
     const endTime = Date.now();
     console.error('MongoDB connection error:', err);

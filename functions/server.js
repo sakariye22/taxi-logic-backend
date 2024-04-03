@@ -10,6 +10,7 @@ const driverRoutes = require('./routes/driverRoutes');
 const mongoose = require('mongoose');
 const userNativeRoutes = require ('./routes/user-native-routes.js');
 const driverNativeRoutes = require ('./routes/driver-native-routes.js');
+const userRoutes = require ('./routes/userRoutes.js');
 
 
 app.use(express.json());
@@ -34,6 +35,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
   
 app.use('/api', driverRoutes);
 
+
+app.use('/api', userRoutes);
 //some comment to test actions 
 
 //natiuve routes 

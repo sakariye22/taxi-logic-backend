@@ -18,5 +18,9 @@
         "titleBar.inactiveBackground": "#737bd099",
         "titleBar.inactiveForeground": "#15202b99"
     },
-    "peacock.color": "#737BD0"
+    "peacock.color": "#737BD0",
+    "cSpell.words": [
+        "testingfuctions",
+        "unicycling"
+    ]
 }
