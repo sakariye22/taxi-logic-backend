@@ -1,0 +1,48 @@
+name: Node.js CI/CD
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'functions/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'functions/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x] # Use the matrix strategy for Node version
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm install
+      working-directory: ./functions
+
+    - name: Run tests
+      run: npm test
+      working-directory: ./functions
+
+    # Include any other build or test scripts here if necessary
+    - name: Run custom server check script
+      run: npm run check-server
+      working-directory: ./functions
+
+    - name: Deploy to Firebase
+      uses: w9jds/firebase-action@master
+      with:
+        args: deploy --only functions
+      env:
+        FIREBASE_TOKEN: 
