@@ -30,9 +30,6 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
  app.get('/', (req, res) => {
     res.json('ok');
   });
-app.get('/health', (req, res) => {
-  res.status(200).send('Server is up and running');
-});
 
   
 app.use('/api', driverRoutes);
