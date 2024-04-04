@@ -162,8 +162,38 @@ async function sendContactEmail(req, res) {
     });
   }
   
-      
+
+  const handleMyDocuments = async (req, res) => {
+    console.log("Handling document upload...");
     
+    if (!req.file) {
+      console.log("No file uploaded.");
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+  
+    try {
+      const uploadedFile = req.file;
+  
+      console.log("Uploaded file:", uploadedFile);
+  
+      const fileExtension = path.extname(uploadedFile.originalname);
+      const newFileName = `${Date.now()}${fileExtension}`;
+      const uploadPath = path.join(__dirname, '..', 'uploads', newFileName);
+  
+      console.log("Uploading file to:", uploadPath);
+  
+      fs.renameSync(uploadedFile.path, uploadPath);
+  
+      console.log("File uploaded successfully.");
+  
+      res.json({ message: 'File uploaded successfully', filePath: uploadPath });
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      res.status(500).json({ error: 'Server error', details: error.message });
+    }
+  };
+  
+
     
-module.exports = { protectedUser, workHours, earningsOverview, updateDriverProfile, getDriverProfile, uploadAvatar, sendContactEmail};
+module.exports = { protectedUser, workHours, earningsOverview, updateDriverProfile, getDriverProfile, uploadAvatar, sendContactEmail, handleMyDocuments};
 

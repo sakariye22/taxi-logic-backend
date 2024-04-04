@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
 
 
 
-const {protectedUser, workHours, earningsOverview,updateDriverProfile,getDriverProfile,uploadAvatar,sendContactEmail} = require ('../driver-mapp/driverController.js');
+const {protectedUser, workHours, earningsOverview,updateDriverProfile,getDriverProfile,uploadAvatar,sendContactEmail, handleMyDocuments} = require ('../driver-mapp/driverController.js');
 
 
 router.get ('/protected-user', authenticateToken, protectedUser);
@@ -35,6 +35,8 @@ router.get('/driver/profile', authenticateToken, getDriverProfile);
 router.post('/upload-avatar', authenticateToken, upload.single('avatar'), uploadAvatar);
 
 router.post('/send-email', sendContactEmail);
+
+router.post('/uploadDocument', upload.single('file'), handleMyDocuments);
 
   
   
