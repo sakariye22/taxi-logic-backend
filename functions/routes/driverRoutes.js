@@ -34,10 +34,11 @@ router.get('/driver/profile', authenticateToken, getDriverProfile);
 
 router.post('/upload-avatar', authenticateToken, upload.single('avatar'), uploadAvatar);
 
-router.post('/send-email', sendContactEmail);
+router.post('/send-email', authenticateToken, sendContactEmail);
 
 router.post('/uploadDocument', upload.single('file'), handleMyDocuments);
 
   
   
 module.exports = router;
+//aaaa
