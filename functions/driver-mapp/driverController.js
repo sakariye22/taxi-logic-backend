@@ -5,7 +5,8 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
 const fs = require('fs');
 const util = require('util');
-const readFile = util.promisify(fs.readFile); 
+const readFile = util.promisify(fs.readFile); // Utilize promisify to read files with async/await
+const nodemailer = require('nodemailer');
 
 
 
@@ -125,8 +126,74 @@ async function uploadAvatar(req, res) {
       res.status(500).json({ error: 'Server Error', details: error.message });
     }
   }
+
+
+  const transporter = nodemailer.createTransport({
+    service: 'hotmail', // eller 'hotmail', 'yahoo', etc.
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.EMAIL_PASSWORD
+    }
+  });
   
-      
+  // Skapa en funktion för att skicka e-post
+  // Inuti sendContactEmail-funktionen i din backend:
+async function sendContactEmail(req, res) {
+    console.log('Received request to send email with body:', req.body);
+    console.log('Environment variables:', process.env.EMAIL, process.env.EMAIL_PASSWORD, process.env.RECEIVER_EMAIL); // Kontrollera att miljövariabler laddas korrekt  
+    const { name, email, message } = req.body;
+  
+    const mailOptions = {
+      from: process.env.EMAIL, // Din företagsemail
+      to: process.env.RECEIVER_EMAIL, // Din mottagaremail
+      subject: 'New Contact Form Submission',
+      text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`,
+      // Om du vill använda HTML i din e-postkropp, använd html-egenskapen istället för text
+    };
+  
+    transporter.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.error('Error sending email:', err);
+        return res.status(500).send('Error sending email.');
+      } else {
+        console.log('Email sent successfully:', info.response);
+        return res.status(200).send('Email sent successfully.');
+      }
+    });
+  }
+  
+
+  const handleMyDocuments = async (req, res) => {
+    console.log("Handling document upload...");
     
+    if (!req.file) {
+      console.log("No file uploaded.");
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+  
+    try {
+      const uploadedFile = req.file;
+  
+      console.log("Uploaded file:", uploadedFile);
+  
+      const fileExtension = path.extname(uploadedFile.originalname);
+      const newFileName = `${Date.now()}${fileExtension}`;
+      const uploadPath = path.join(__dirname, '..', 'uploads', newFileName);
+  
+      console.log("Uploading file to:", uploadPath);
+  
+      fs.renameSync(uploadedFile.path, uploadPath);
+  
+      console.log("File uploaded successfully.");
+  
+      res.json({ message: 'File uploaded successfully', filePath: uploadPath });
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      res.status(500).json({ error: 'Server error', details: error.message });
+    }
+  };
+  
+
     
-module.exports = { protectedUser, workHours, earningsOverview,updateDriverProfile, getDriverProfile,uploadAvatar};
+module.exports = { protectedUser, workHours, earningsOverview, updateDriverProfile, getDriverProfile, uploadAvatar, sendContactEmail, handleMyDocuments};
+
