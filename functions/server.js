@@ -37,14 +37,11 @@ app.use('/api', driverRoutes);
 
 
 app.use('/api', userRoutes);
-//some comment to test actions 
 
-//natiuve routes 
 app.use('/user', userNativeRoutes);
 
 app.use ('/driver', driverNativeRoutes);
-
-
+//hahdhadaguyhuhurtrtrt
 
 
   

@@ -166,3 +166,4 @@ async function sendContactEmail(req, res) {
     
     
 module.exports = { protectedUser, workHours, earningsOverview, updateDriverProfile, getDriverProfile, uploadAvatar, sendContactEmail};
+
