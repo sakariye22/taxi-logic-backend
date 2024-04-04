@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
 
 
 
-const {protectedUser, workHours, earningsOverview,updateDriverProfile,getDriverProfile,uploadAvatar} = require ('../driver-mapp/driverController.js');
+const {protectedUser, workHours, earningsOverview,updateDriverProfile,getDriverProfile,uploadAvatar,sendContactEmail} = require ('../driver-mapp/driverController.js');
 
 
 router.get ('/protected-user', authenticateToken, protectedUser);
@@ -32,10 +32,9 @@ router.patch('/profile',authenticateToken, updateDriverProfile);
 
 router.get('/driver/profile', authenticateToken, getDriverProfile);
 
-
-// Antag att router är en instans av express.Router()
 router.post('/upload-avatar', authenticateToken, upload.single('avatar'), uploadAvatar);
 
+router.post('/send-email', sendContactEmail);
 
   
   
