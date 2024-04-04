@@ -25,7 +25,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
          metrics: {
            sessionCount: 42,
            achievementPoints: 1234,
-           highScore: 9999999
+           highScore: 99999999
          },
          status: {
            online: false,
