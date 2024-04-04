@@ -39,6 +39,32 @@ const JWT_SECRET = process.env.JWT_SECRET;
          }
        });
       }
-    
-module.exports = {forUser,testingfuctions};
 
+
+async function updateProfilePicture(req, res) {
+   // req.user is set by the authenticateToken middleware
+   const userId = req.user.id;
+   const { profilePictureUrl } = req.body;
+
+   if (!profilePictureUrl) {
+       return res.status(400).json({ message: 'Profile picture URL is required' });
+   }
+
+   try {
+       const updatedUser = await User.findByIdAndUpdate(userId, { profilePictureUrl: profilePictureUrl }, { new: true });
+
+       if (!updatedUser) {
+           return res.status(404).json({ message: 'User not found' });
+       }
+
+       res.json({
+           message: 'Profile picture updated successfully',
+           profilePictureUrl: updatedUser.profilePictureUrl
+       });
+   } catch (error) {
+       console.error('Error updating profile picture:', error);
+       res.status(500).json({ message: 'Internal server error' });
+   }
+}
+
+module.exports = { forUser, testingFunctions, updateProfilePicture };
