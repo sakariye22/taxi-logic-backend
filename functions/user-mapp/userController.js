@@ -1,12 +1,41 @@
-require('dotenv').config();
-const User = require('../model/User.js');
+const multer = require('multer');
+const crypto = require('crypto');
+const path = require('path');
+const { GridFsStorage } = require('multer-gridfs-storage');
 const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET;
 
 
+// Initialize GridFS Bucket
+const conn = mongoose.createConnection(process.env.MONGODB_URL, {
 
+});
 
+let gfs;
+conn.once('open', () => {
+  // Initialize stream
+  gfs = new mongoose.mongo.GridFSBucket(conn.db, {
+    bucketName: 'uploads',
+  });
+});
+
+const storage = new GridFsStorage({
+  url: process.env.MONGODB_URL,
+  file: (req, file) => {
+    return new Promise((resolve, reject) => {
+      if (!req.user || !req.user.id) {
+        return reject(new Error('User ID not found'));
+      }
+      const filename = req.user.id + path.extname(file.originalname); // Ensures unique filename per user
+      const fileInfo = {
+        filename: filename,
+        bucketName: 'uploads',
+      };
+      resolve(fileInfo);
+    });
+  },
+});
+
+const upload = multer({ storage });
 
    async function forUser (req,res){
       res.json ('this is for users pages mainly react')
@@ -66,4 +95,4 @@ const JWT_SECRET = process.env.JWT_SECRET;
         }
       };
       
-      module.exports = { forUser, testingfuctions, updateProfilePicture, upload };get
+      module.exports = { forUser, testingfuctions, updateProfilePicture, upload };
