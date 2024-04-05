@@ -40,8 +40,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
        });
       }
 
-
-      async function updateProfilePicture(req, res) {
+      const updateProfilePicture = async (req, res) => {
         if (!req.file) {
           console.log("No file uploaded.");
           return res.status(400).json({ message: 'No file uploaded.' });
@@ -50,29 +49,21 @@ const JWT_SECRET = process.env.JWT_SECRET;
         const fileUrl = `/file/${req.file.filename}`;
         console.log("File URL:", fileUrl);
       
-        const userId = req.user.id; 
+        const userId = req.user.id;
       
         try {
-          // Search for existing profile picture and delete it
-          gfs.find({ filename: new RegExp(userId) }).toArray(async (err, files) => {
-            if (err) {
-              return res.status(500).json({ message: 'Error searching for existing files' });
-            }
-            if (files.length > 0) {
-              await gfs.delete(new mongoose.Types.ObjectId(files[0]._id));
-            }
+          const existingFiles = await gfs.find({ filename: new RegExp(userId) }).toArray();
+          if (existingFiles.length > 0) {
+            await gfs.delete(new mongoose.Types.ObjectId(existingFiles[0]._id));
+          }
+
+          await User.findByIdAndUpdate(userId, { profilePictureUrl: fileUrl });
       
-            // Once the old file is deleted, update the user's profilePictureUrl
-            await User.findByIdAndUpdate(userId, { profilePictureUrl: fileUrl });
-            
-            // Return success response
-            return res.json({ message: 'Profile picture updated successfully', fileUrl: fileUrl });
-          });
+          return res.json({ message: 'Profile picture updated successfully', fileUrl: fileUrl });
         } catch (error) {
           console.error("Error updating user profile picture:", error);
           return res.status(500).json({ message: 'Failed to update profile picture' });
         }
-      }
+      };
       
-      
-      module.exports = { forUser, testingfuctions, updateProfilePicture, upload };
+      module.exports = { forUser, testingfuctions, updateProfilePicture, upload };get
