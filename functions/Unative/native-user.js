@@ -156,6 +156,61 @@ async function getProfilePictureUrl(req, res) {
     }
 }
 
+async function getProfilePictureNative(req, res) {
+    const userId = req.user.id;
 
-module.exports = { RideRequest, Awaiting, getProfilePictureUrl,  PostProfilePicture ,upload};
+    try {
+        const user = await User.findById(userId);
+        if (!user || !user.profilePictureUrl) {
+            return res.status(404).send('No profile picture found.');
+        }
+
+        const db = mongoose.connection.db;
+        const bucket = new GridFSBucket(db, { bucketName: 'uploads' });
+
+        const filename = user.profilePictureUrl;
+
+        const file = await db.collection('uploads.files').findOne({ filename: filename });
+        if (!file) {
+            return res.status(404).send('No file found.');
+        }
+
+        // For React Native, ensure the Content-Type header is set correctly for the image being served.
+        // React Native's Image component should handle this URI directly.
+        res.setHeader('Content-Type', file.contentType); 
+        res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"');
+
+        const downloadStream = bucket.openDownloadStreamByName(filename);
+        downloadStream.pipe(res);
+    } catch (error) {
+        console.error('Error serving profile picture:', error);
+        res.status(500).send('Server Error');
+    }
+}
+
+async function getUserDetails(req, res) {
+    const userId = req.user.id; 
+
+    try {
+        const user = await User.findById(userId); // Find the user by ID
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+
+        return res.status(200).send({
+            username: user.name,
+            email: user.email,
+            phoneNumber: user.phone_number // Assuming `phone_number` is the field in your schema
+        });
+    } catch (error) {
+        console.error('Database Error:', error);
+        res.status(500).send('Server Error');
+    }
+}
+
+
+
+
+
+module.exports = { RideRequest, Awaiting, getProfilePictureUrl,  PostProfilePicture ,upload, getProfilePictureNative, getUserDetails}; 
 // jjsdwrssfsfweqeqeetetete
