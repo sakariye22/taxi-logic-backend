@@ -42,7 +42,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 
 async function updateProfilePicture(req, res) {
-   // req.user is set by the authenticateToken middleware
    const userId = req.user.id;
    const { profilePictureUrl } = req.body;
 
@@ -67,4 +66,4 @@ async function updateProfilePicture(req, res) {
    }
 }
 
-module.exports = { forUser, testingFunctions, updateProfilePicture };
+module.exports = { forUser, testingfuctions, updateProfilePicture };
