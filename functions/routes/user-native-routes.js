@@ -5,12 +5,13 @@ const { authenticateToken, tokenBlacklist } = require("../middleware/authenticat
 
 
 // Import the functions and the upload middleware from your controller file
-const { RideRequest, Awaiting, getProfilePictureUrl, PostProfilePicture, upload, getProfilePictureNative, getUserDetails } = require('../Unative/native-user.js');
+const { RideRequest, Awaiting, getProfilePictureUrl, PostProfilePicture, upload, getProfilePictureNative, getUserDetails, updateUserDetails } = require('../Unative/native-user.js');
 
 // Your existing routes for requesting a ride and getting awaiting rides
 router.post('/request-ride', authenticateToken, RideRequest);
 router.get('/waiting/rides', authenticateToken, Awaiting);
 router.post('/update-image', authenticateToken, upload, PostProfilePicture);
+router.patch ('/patch',authenticateToken, updateUserDetails);
 
 router.get('/profile-image', authenticateToken, getProfilePictureUrl); 
 router.get('/profile-image2', authenticateToken, getProfilePictureNative);  

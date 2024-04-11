@@ -174,9 +174,6 @@ async function getProfilePictureNative(req, res) {
         if (!file) {
             return res.status(404).send('No file found.');
         }
-
-        // For React Native, ensure the Content-Type header is set correctly for the image being served.
-        // React Native's Image component should handle this URI directly.
         res.setHeader('Content-Type', file.contentType); 
         res.setHeader('Content-Disposition', 'inline; filename="' + filename + '"');
 
@@ -192,7 +189,7 @@ async function getUserDetails(req, res) {
     const userId = req.user.id; 
 
     try {
-        const user = await User.findById(userId); // Find the user by ID
+        const user = await User.findById(userId); 
         if (!user) {
             return res.status(404).send('User not found');
         }
@@ -200,7 +197,36 @@ async function getUserDetails(req, res) {
         return res.status(200).send({
             username: user.name,
             email: user.email,
-            phoneNumber: user.phone_number // Assuming `phone_number` is the field in your schema
+            phoneNumber: user.phone_number 
+        });
+    } catch (error) {
+        console.error('Database Error:', error);
+        res.status(500).send('Server Error');
+    }
+}
+async function updateUserDetails(req, res) {
+    const userId = req.user.id;
+    const { name, email, phoneNumber } = req.body;  
+    if (!name && !email && !phoneNumber) {
+        return res.status(400).send('No updates provided');
+    }
+
+    try {
+        const user = await User.findById(userId); 
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+
+        if (name) user.name = name;
+        if (email) user.email = email;
+        if (phoneNumber) user.phone_number = phoneNumber;
+
+        await user.save(); 
+
+        return res.status(200).send({
+            username: user.name,
+            email: user.email,
+            phoneNumber: user.phone_number 
         });
     } catch (error) {
         console.error('Database Error:', error);
@@ -211,6 +237,5 @@ async function getUserDetails(req, res) {
 
 
 
-
-module.exports = { RideRequest, Awaiting, getProfilePictureUrl,  PostProfilePicture ,upload, getProfilePictureNative, getUserDetails}; 
+module.exports = { RideRequest, Awaiting, getProfilePictureUrl,  PostProfilePicture ,upload, getProfilePictureNative, getUserDetails, updateUserDetails};  
 // jjsdwrssfsfweqeqeetetete
