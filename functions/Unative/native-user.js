@@ -283,49 +283,7 @@ function simulateDriverMovement(driver) {
 
 
 
-//simulate 
-async function simulateNearbyDrivers(req, res) {
-    const { latitude, longitude } = req.body;
 
-    if (latitude == null || longitude == null) {
-        return res.status(400).send('Invalid latitude or longitude provided.');
-    }
-
-    // Simulate fetching nearby drivers. In reality, you'd likely query your database.
-    const simulatedDrivers = [
-        { latitude: latitude + 0.01, longitude: longitude + 0.01 },
-        { latitude: latitude + 0.01, longitude: longitude - 0.01 },
-        { latitude: latitude - 0.01, longitude: longitude + 0.01 },
-        { latitude: latitude - 0.01, longitude: longitude - 0.01 },
-        { latitude: latitude - 0.01, longitude: longitude - 0.01 }
-    ];
-    setInterval(async () => {
-        try {
-            // Simulate movement for each driver
-            const movedDrivers = await Promise.all(simulatedDrivers.map(simulateDriverMovement));
-
-            // Respond with the moved drivers' locations
-            // Instead of a response, you might want to push updates to the client, e.g., via WebSocket
-            console.log('Updated driver locations:', movedDrivers);
-        } catch (error) {
-            console.error('Error updating driver locations:', error);
-        }
-    }, 5000);
-
-    try {
-        const snappedDrivers = await Promise.all(simulatedDrivers.map(async driver => {
-            return await snapToRoad(driver.latitude, driver.longitude);
-        }));
-
-        res.json({
-            message: 'Nearby drivers simulated successfully.',
-            drivers: snappedDrivers
-        });
-    } catch (error) {
-        console.error('Error simulating nearby drivers:', error);
-        res.status(500).send('Server Error');
-    }
-}
 
 async function snapToRoad(latitude, longitude) {
     const url = `https://roads.googleapis.com/v1/nearestRoads?points=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
@@ -345,5 +303,5 @@ async function snapToRoad(latitude, longitude) {
 
 
 
-module.exports = { RideRequest, Awaiting, getProfilePictureUrl,  PostProfilePicture ,upload, getProfilePictureNative, getUserDetails, updateUserDetails, updateLocation, simulateNearbyDrivers};   
+module.exports = { RideRequest, Awaiting, getProfilePictureUrl,  PostProfilePicture ,upload, getProfilePictureNative, getUserDetails, updateUserDetails, updateLocation};   
 // jjsdwrssfsfweqeqeetetete

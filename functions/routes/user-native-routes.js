@@ -5,7 +5,7 @@ const { authenticateToken, tokenBlacklist } = require("../middleware/authenticat
 
 
 // Import the functions and the upload middleware from your controller file
-const { RideRequest, Awaiting, getProfilePictureUrl, PostProfilePicture, upload, getProfilePictureNative, getUserDetails, updateUserDetails,updateLocation, simulateNearbyDrivers } = require('../Unative/native-user.js');
+const { RideRequest, Awaiting, getProfilePictureUrl, PostProfilePicture, upload, getProfilePictureNative, getUserDetails, updateUserDetails,updateLocation } = require('../Unative/native-user.js');
 
 // Your existing routes for requesting a ride and getting awaiting rides
 router.post('/request-ride', authenticateToken, RideRequest);
@@ -19,7 +19,6 @@ router.get('/profile-image', authenticateToken, getProfilePictureUrl);
 router.get('/profile-image2', authenticateToken, getProfilePictureNative);  
 router.get('/details', authenticateToken, getUserDetails );  
 
-router.post('/simulate-nearby-drivers', authenticateToken, simulateNearbyDrivers);
 
 
 module.exports = router;
