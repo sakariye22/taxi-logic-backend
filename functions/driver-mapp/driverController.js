@@ -7,6 +7,7 @@ const fs = require('fs');
 const util = require('util');
 const readFile = util.promisify(fs.readFile); // Utilize promisify to read files with async/await
 const nodemailer = require('nodemailer');
+const upload = require('../routes/gridConfig.js')
 
 
 
@@ -101,8 +102,9 @@ const nodemailer = require('nodemailer');
     }
 
    // driverController.js
-async function uploadAvatar(req, res) {
-    console.log('uploadAvatar called with file:', req.file);
+   const uploadAvatar = async (req, res) => {
+    // Hantera filuppladdning som i din User backend
+    console.log('uploadDriverAvatar called with file:', req.file);
   
     if (!req.file) {
       console.error('No file uploaded with the request.');
@@ -110,22 +112,25 @@ async function uploadAvatar(req, res) {
     }
   
     try {
-        const driver = await Driver.findById(req.user.id);
-        if (!driver) {
-          return res.status(404).json({ error: 'Driver not found.' });
-        }
-        
-        // Ange den korrekta sökvägen relativt från rooten av din server
-        driver.avatar = `/uploads/${req.file.filename}`;
-        await driver.save();
+      const driverId = req.user.id; // Antag att `req.user.id` finns och är korrekt
   
-      console.log('Avatar uploaded successfully for driver:', driver.id);
-      res.json({ message: 'Avatar uploaded successfully', avatar: driver.avatar });
+      // Hitta och radera tidigare fil om den finns
+      const existingFile = await gfs.find({ filename: new RegExp(driverId) }).toArray();
+      if (existingFile.length > 0) {
+        await gfs.delete(new mongoose.Types.ObjectId(existingFile[0]._id));
+      }
+  
+      // Uppdatera Driver-modellen med nya filens URL
+      const fileUrl = `/uploads/${req.file.filename}`;
+      await Driver.findByIdAndUpdate(driverId, { avatar: fileUrl });
+  
+      console.log('Avatar uploaded successfully for driver:', driverId);
+      res.json({ message: 'Avatar uploaded successfully', fileUrl: fileUrl });
     } catch (error) {
-      console.error('Error in uploadAvatar:', error);
+      console.error('Error in uploadDriverAvatar:', error);
       res.status(500).json({ error: 'Server Error', details: error.message });
     }
-  }
+  };
 
 
   const transporter = nodemailer.createTransport({
