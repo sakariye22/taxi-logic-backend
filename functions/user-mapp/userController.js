@@ -1,13 +1,33 @@
-require('dotenv').config();
-const User = require('../model/User.js');
+const multer = require('multer');
+const crypto = require('crypto');
+const path = require('path');
+const { GridFsStorage } = require('multer-gridfs-storage');
 const mongoose = require('mongoose');
+<<<<<<< HEAD
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
 const multer = require('multer');
 const crypto = require('crypto');
 const path = require('path');
 const { GridFsStorage } = require('multer-gridfs-storage');
+=======
+>>>>>>> refs/remotes/origin/user
 
+// Initialize GridFS Bucket
+const conn = mongoose.createConnection(process.env.MONGODB_URL, {
+
+<<<<<<< HEAD
+});
+
+let gfs;
+conn.once('open', () => {
+  // Initialize stream
+  gfs = new mongoose.mongo.GridFSBucket(conn.db, {
+    bucketName: 'uploads',
+  });
+});
+
+=======
 // Initialize GridFS Bucket
 const conn = mongoose.createConnection(process.env.MONGODB_URL, {
 
@@ -21,6 +41,7 @@ conn.once('open', () => {
   });
 });
 
+>>>>>>> refs/remotes/origin/user
 const storage = new GridFsStorage({
   url: process.env.MONGODB_URL,
   file: (req, file) => {
@@ -37,6 +58,10 @@ const storage = new GridFsStorage({
     });
   },
 });
+<<<<<<< HEAD
+=======
+console.log('hello world');
+>>>>>>> refs/remotes/origin/user
 
 const upload = multer({ storage });
 
