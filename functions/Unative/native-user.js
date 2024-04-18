@@ -114,7 +114,7 @@ async function Awaiting(req, res) {
     } catch (error) {
         console.error('Error fetching rides:', error);
         res.status(500).send('Server Error');
-    }
+    }// hello world
 };
 
 async function PostProfilePicture(req, res) {

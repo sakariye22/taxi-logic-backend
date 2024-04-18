@@ -32,6 +32,11 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
     res.json('ok');
   });
 
+
+  app.get('/yes', (req, res) => {
+    res.json('yes from yes  ');
+  });
+
   
 app.use('/api', driverRoutes);
 
