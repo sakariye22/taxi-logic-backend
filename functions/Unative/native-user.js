@@ -61,8 +61,8 @@ async function updateLocation(req, res) {
 
 
 async function RideRequest(req, res) {
-    const userId = req.user.id; 
-    const { pickup_latitude, pickup_longitude, dropoff_latitude, dropoff_longitude } = req.body;
+    const userId = req.user.id;
+    const { pickup_latitude, pickup_longitude, dropoff_latitude, dropoff_longitude, distance, duration, fare } = req.body;
     try {
         const user = await User.findById(userId);
         if (!user) {
@@ -71,20 +71,22 @@ async function RideRequest(req, res) {
 
         const ride = new Ride({
             user_id: userId,
-            driver_id: null, // No driver assigned at the moment of creation
+            driver_id: null,
             pickup_latitude: mongoose.Types.Decimal128.fromString(pickup_latitude.toString()),
             pickup_longitude: mongoose.Types.Decimal128.fromString(pickup_longitude.toString()),
             dropoff_latitude: mongoose.Types.Decimal128.fromString(dropoff_latitude.toString()),
             dropoff_longitude: mongoose.Types.Decimal128.fromString(dropoff_longitude.toString()),
-            status: 'requested',  // Initial status for a new ride
-            fare_status: 'waiting_for_proposals'  // Awaiting driver proposals
+            distance,
+            duration,
+            fare: mongoose.Types.Decimal128.fromString(fare.toString()),
+            status: 'requested'
         });
 
-        await ride.save(); 
-        res.status(201).json({ message: 'Ride requested successfully. Awaiting driver proposals.', rideId: ride._id });
+        await ride.save();
+        res.status(201).json({ message: 'Ride requested successfully.', rideId: ride._id });
     } catch (error) {
         console.error('Database Error:', error);
-        res.status(500). send('Server Error');
+        res.status(500).send('Server Error');
     }
 }
 
